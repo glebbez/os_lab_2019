@@ -2,6 +2,17 @@
 
 void RevertString(char *str)
 {
-	// your code here
+	int strlength = 0;
+    while (*(strlength+str)!=0)
+    {
+        ++strlength;
+    }
+    int i;
+    for (i=0; i<(strlength-1)/2; i++)
+    {
+        char temporary = *(str+i);
+        *(str+i) = *(str+strlength-i-1);
+        *(str+strlength-i-1) = temporary;
+    }
 }
 
