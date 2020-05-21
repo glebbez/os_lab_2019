@@ -30,12 +30,17 @@ static void sig_alarm(int sigg)
     printf("Timeout exceeded. . .\n");
     for(int i = 0; i < pnum; ++i)
     {
-        kill(child_pid[i], SIGKILL);
+        // заставляем программу заверишть работу немедленно. 
+        // несохраненные результаты будут потеряны
+        kill(child_pid[i], SIGKILL); 
     }
-    while (active_child_processes >= 0) {
-        // your code here
+    while (active_child_processes >= 0) 
+    {
         int wpid = waitpid(-1, NULL, WNOHANG);
         printf("%d\n", active_child_processes);
+        // завершаем работу всех дочерних процессов 
+        // как только waitpid вернул -1 выводим ошибку о том,
+        // что активных дочерних процессов нет
         if(wpid == -1)
         {
             if(errno == ECHILD) break;
@@ -111,6 +116,7 @@ int main(int argc, char **argv) {
     					break;
     					
     				case 4:
+                        // если таймаут вдруг задан, то он - положительное число
     				    timeout = atoi(optarg);
     				    if(timeout <= 0){
     				        printf("timeout is a positive number\n");
@@ -200,7 +206,7 @@ int main(int argc, char **argv) {
 		}
 	}
 	
-	const char path_to_save[] = "trash/file_desc_";
+	const char path_to_save[] = "data";
 	
 	
 	int file_desc[pnum][2][2];
@@ -219,10 +225,7 @@ int main(int argc, char **argv) {
 	    printf("\nTimeout is %d second\n", timeout);
 	    printf("Sleep is %d second\n\n", timeout + 1);
 	    
-    	if(signal(SIGALRM, sig_alarm))
-        {
-          printf("Cannot catch SIGALARM\n");
-        }
+    	signal(SIGALRM, sig_alarm);
         
         alarm(timeout);        
     }
@@ -240,7 +243,7 @@ int main(int argc, char **argv) {
 		if (child_pid[i] == 0) {
 		    
 			
-            //sleep(timeout + 1);
+            sleep(timeout + 1);
 			
 		
 			int begin = i * array_size / pnum;
