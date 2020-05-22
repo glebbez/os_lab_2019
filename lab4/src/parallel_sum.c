@@ -18,11 +18,6 @@
 
 #include "utils.h"
 
-#define ERROR_CREATE_THREAD -11
-#define ERROR_JOIN_THREAD   -12
-#define SUCCESS        0
-
-
 struct SumArgs {
 	
 	int *array;
@@ -65,7 +60,7 @@ int main(int argc, char **argv) {
     const char* short_options = "s:t:a:p";
     
     static struct option options[] = {{"seed", required_argument, 0, 's'},
-                                    {"threads_num", required_argument, 0, 't'},
+                                      {"threads_num", required_argument, 0, 't'},
                                       {"array_size", required_argument, 0, 'a'},
 									  {"print_array", no_argument, 0, 'p'},
                                       {0, 0, 0, 0}};
@@ -224,14 +219,10 @@ int main(int argc, char **argv) {
 	gettimeofday(&start_time, NULL);
 	
 	int status;
-	
+	printf("\n");
 	for (uint32_t i = 0; i < threads_num; ++i) {
 		status = pthread_create(&threads[i], NULL, ThreadSum, (void *)&(args[i]));
-		printf("thread: %d\n", threads[i]);
-        if (status != SUCCESS ) {
-			printf("Error: pthread_create failed!\n");
-			return 1;
-		}
+		printf("thread for counting: %d\n", threads[i]);
 	}
 
 	int total_sum = 0;
@@ -241,12 +232,8 @@ int main(int argc, char **argv) {
 	for (uint32_t i = 0; i < threads_num; ++i) {
 		
 		int sum = 0;
-		status = pthread_join(threads[i], (void **)&sum);
+		pthread_join(threads[i], (void **)&sum);
         printf("thread: %d\n", threads[i]);
-		if (status != SUCCESS) {
-              printf("main error: can't join thread, status = %d\n", status);
-              exit(ERROR_JOIN_THREAD);
-        }
 		printf("Sum_%d: %d\n", i+1, sum);
 		total_sum += sum;
 	}
