@@ -14,7 +14,18 @@ struct fact_args {
     int mod;
 };
 
-void ParFact(void*);
+void ParFact(void* args){
+    struct fact_args* str=(struct fact_args*)args;
+    int buf=1;
+    for(int i=str->begin;i<=str->end;i++){
+        buf=((buf*i)%str->mod);
+        printf("Buf - %d\n",buf);
+    }
+
+    pthread_mutex_lock(&mut);
+    factorial=(factorial*buf)%str->mod;
+    pthread_mutex_unlock(&mut);
+}
 
 int main(int argc, char **argv)
 {
@@ -70,11 +81,7 @@ int main(int argc, char **argv)
         printf("getopt returned character code 0%o?\n", c);
     }
   }
-  if (threads_num == 0 || mod_n == 0 || fact_n == -1) {
-    printf("Usage: %s -k \"num\" --pnum \"num\" --mod \"num\" \n",
-           argv[0]);
-    return 1;
-  }
+
   struct fact_args args[threads_num];
   int part=fact_n/threads_num;
   for(int i=0;i<threads_num;i++){
@@ -83,30 +90,10 @@ int main(int argc, char **argv)
       args[i].mod=mod_n;
   }
   for(int i=0;i<threads_num;i++){
-      if (pthread_create(&threads[i], NULL, (void *)ParFact, (void *)&args[i])) {
-      printf("Error: pthread_create failed!\n");
-      return 1;
-    }
+      pthread_create(&threads[i], NULL, (void *)ParFact, (void *)&args[i]); 
   }
   for(int i=0;i<threads_num;i++){
-    if (pthread_join(threads[i], NULL) != 0) {
-    perror("pthread_join");
-    exit(1);
-    }
+    pthread_join(threads[i], NULL);
   }
   printf("Factorial - %d\n",factorial);
-
-}
-
-void ParFact(void* args){
-    struct fact_args* str=(struct fact_args*)args;
-    int buf=1;
-    for(int i=str->begin;i<=str->end;i++){
-        buf=((buf*i)%str->mod);
-        printf("Buf - %d\n",buf);
-    }
-
-    pthread_mutex_lock(&mut);
-    factorial=(factorial*buf)%str->mod;
-    pthread_mutex_unlock(&mut);
 }
