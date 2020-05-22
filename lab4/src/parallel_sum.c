@@ -6,7 +6,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <signal.h>
@@ -41,7 +41,6 @@ void* ThreadSum(void *args) {
 	{
 		sum += (sum_args->array)[i];
 	}
-	
 	return (void *)sum;
 }
 
@@ -66,7 +65,7 @@ int main(int argc, char **argv) {
     const char* short_options = "s:t:a:p";
     
     static struct option options[] = {{"seed", required_argument, 0, 's'},
-                                      {"threads_num", required_argument, 0, 't'},
+                                    {"threads_num", required_argument, 0, 't'},
                                       {"array_size", required_argument, 0, 'a'},
 									  {"print_array", no_argument, 0, 'p'},
                                       {0, 0, 0, 0}};
@@ -228,7 +227,8 @@ int main(int argc, char **argv) {
 	
 	for (uint32_t i = 0; i < threads_num; ++i) {
 		status = pthread_create(&threads[i], NULL, ThreadSum, (void *)&(args[i]));
-		if (status != SUCCESS ) {
+		printf("thread: %d\n", threads[i]);
+        if (status != SUCCESS ) {
 			printf("Error: pthread_create failed!\n");
 			return 1;
 		}
@@ -242,10 +242,10 @@ int main(int argc, char **argv) {
 		
 		int sum = 0;
 		status = pthread_join(threads[i], (void **)&sum);
-		
+        printf("thread: %d\n", threads[i]);
 		if (status != SUCCESS) {
-            printf("main error: can't join thread, status = %d\n", status);
-            exit(ERROR_JOIN_THREAD);
+              printf("main error: can't join thread, status = %d\n", status);
+              exit(ERROR_JOIN_THREAD);
         }
 		printf("Sum_%d: %d\n", i+1, sum);
 		total_sum += sum;
