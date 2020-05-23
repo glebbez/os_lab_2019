@@ -4,8 +4,8 @@ CFLAGS=-I.
 mutex : mutex.c
 	$(CC) -o mutex mutex.c -lpthread $(CFLAGS)
 
-fact : fact.c
-	$(CC) -o fact fact.c -lpthread
+fact : factorial.c
+	$(CC) -o fact factorial.c -std=c99 -lpthread
 	
 dl : deadlock.c
 	$(CC) -o dl deadlock.c -lpthread
