@@ -7,7 +7,6 @@
 
 pthread_mutex_t mut = PTHREAD_MUTEX_INITIALIZER;
 int factorial = 1;
-
 struct fact_args {
     int begin;
     int end;
@@ -15,15 +14,16 @@ struct fact_args {
 };
 
 void ParFact(void* args){
+    int buf = 1;
     struct fact_args* str=(struct fact_args*)args;
-    int buf=1;
     for(int i=str->begin;i<=str->end;i++){
-        buf=((buf*i)%str->mod);
+        buf=((buf*i));
         printf("Buf - %d\n",buf);
     }
 
     pthread_mutex_lock(&mut);
-    factorial=(factorial*buf)%str->mod;
+    factorial=(factorial*buf);
+    printf("temporary factorial - %d\n", factorial);
     pthread_mutex_unlock(&mut);
 }
 
@@ -52,7 +52,7 @@ int main(int argc, char **argv)
           case 1:
             mod_n = atoi(optarg);
             if (mod_n <= 0) {
-                printf("array_size is a positive number\n");
+                printf("mod_n is a positive number\n");
                 return 1;
             }
             break;
@@ -84,6 +84,8 @@ int main(int argc, char **argv)
 
   struct fact_args args[threads_num];
   int part=fact_n/threads_num;
+  printf("part - %d\n", part);
+  // делим 
   for(int i=0;i<threads_num;i++){
       args[i].begin=i*part+1;
       args[i].end=(i == (threads_num - 1) ) ? fact_n: (i + 1) * part;
@@ -95,5 +97,5 @@ int main(int argc, char **argv)
   for(int i=0;i<threads_num;i++){
     pthread_join(threads[i], NULL);
   }
-  printf("Factorial - %d\n",factorial);
+  printf("Factorial - %d\n",factorial%mod_n);
 }
